@@ -17,7 +17,7 @@
 </html>
 ```
 
-接下来既然是画图，就有两种选择：一种是<svg>，一种是<canvas>。就我所知，前者矢量后者像素图。然后矢量有矢量的好处，像素有像素的好处。具体的好处百度一下就有了...
+接下来既然是画图，就有两种选择：一种是svg，一种是canvas。其实我知道的也不是特别多，前者是矢量图，后者是像素图。然后矢量有矢量的好处，像素有像素的好处。具体的好处百度一下就有了...
 我们先选择 svg。 
 然后第一件事情就是把svg放入到html中，注意这里，将一切都放在js中进行。代码如下：
 ```js
@@ -78,3 +78,16 @@ svg.appendChild(line);
 
 结果为：
 ![want](https://github.com/leperca/wpmc/blob/master/f1/s3.png)
+
+好的，那么再画第二条线。此时我抑制了一下整理代码的冲动，以及给前面的线条改名字的冲动。代码竖线代码如下。
+```js
+let line2 = document.createElementNS(svgns, "line");
+line2.setAttribute("x1", 400);
+line2.setAttribute("y1", 0);
+line2.setAttribute("x2", 400);
+line2.setAttribute("y2", 400);
+line2.setAttribute("style", "stroke:rgb(99,99,99);stroke-width:1");
+svg.appendChild(line2);
+```
+好了，这个结果如下：
+![want](https://github.com/leperca/wpmc/blob/master/f1/s4.svg)
