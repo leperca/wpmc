@@ -23,6 +23,7 @@
 ```js
 const svgns = "http://www.w3.org/2000/svg";
 let svg = document.createElementNS(svgns, "svg");
+svg.setAttribute("xmlns", svgns);
 svg.setAttribute("width", 800);
 svg.setAttribute("height", 400);
 svg.setAttribute("style", "border:1px solid green");
@@ -91,3 +92,184 @@ svg.appendChild(line2);
 ```
 好了，这个结果如下：
 ![want](https://github.com/leperca/wpmc/blob/master/f1/s4.svg)
+上面这个图片svg格式的，github上显示的时候出现了点问题--没有了下边和右边的绿色边框不见了。算了，不管它继续重要的事情。
+
+看到了上面的内容，我们学会了画线的方法。于是可以把上头的画线方法包装成一个函数。我想了想，算了，暂时还是不做这样的事情，先把所有事情都处理完，再去包装整理代码吧。
+下面开始要话真实的点了。先不管三七二十一，先上w3c上面看看怎么画个点。好吧，没有看到点，那就画个圈也行，如下
+```html
+<circle cx="100" cy="50" r="40" stroke="black"
+stroke-width="2" fill="red"/>
+```
+好的，那么我们画个点，其他都不变，照猫画虎。
+```js
+let origin = document.createElementNS(svgns, "circle"); 
+//注意需要改成“circle”
+origin.setAttribute("cx", 100); 
+origin.setAttribute("cy", 0);
+origin.setAttribute("r", 40);
+origin.setAttribute("stroke", "black");
+origin.setAttribute("stroke-width", "2");
+origin.setAttribute("fill", "red");
+svg.appendChild(origin);
+```
+好的，虽然复制粘贴了一下代码，并且命名上也显得有点随意，但是无妨，简陋一点呗，结果如下。
+![want](https://github.com/leperca/wpmc/blob/master/f1/s5.svg)
+
+结果其实挺丑的，哈哈哈。改参数，边调整，边看结果，
+此时可以借助chrome的调试工具，就可以改成如下结果。
+
+```js
+let origin = document.createElementNS(svgns, "circle"); 
+//注意需要改成“circle”
+origin.setAttribute("cx", 400); 
+origin.setAttribute("cy", 200);
+origin.setAttribute("r", 5);
+origin.setAttribute("stroke", "black");
+origin.setAttribute("stroke-width", "1");
+origin.setAttribute("fill", "white");
+svg.appendChild(origin);
+```
+![want](https://github.com/leperca/wpmc/blob/master/f1/s6.png)
+
+由上面的内容我们可以知道，
+其实有两套的数字，一个是真实的点的坐标，另外一个是图像上的坐标。显然这两个不是一致的，我们需要做一些调整。这就是我们可能需要花时间的地方。为了方便，构造一个函数来帮助我们做坐标转化的事情。
+
+这里涉及到两个正逆过程，一个是把真实的坐标转化成为svg图像上的坐标【正过程】，
+另一个是把svg图像上的坐标转化成为真实坐标【逆过程】。这样说起来有点含糊，一边画点，一边来使问题更加清晰。
+例如我想画个点，真实的坐标是（0，0）的原点，然而在svg图像上它的坐标是(400，200)
+这个是我们上边调整得来的结论。意思也很明白。
+那么我们就写这样一个函数吧，就是把（0，0）变成为（400，200）的函数：
+```js
+function real2svg_funny(x, y) {
+    if (x == 0 && y == 0) {
+        return [400,200]
+    }
+}
+```
+哈哈，显然，上面这个函数只能做那么一件事情。就是放入一个（0，0），输出一个（400，200）。非常完美。当然，这有点搞笑了，它不能解决一个问题，我们希望放入一个(4,3)它可以得到一个其他数字，例如（某数，某数）。很糟糕，需要稍微算个数字。
+
+好吧，那就计算一下吧。我们整理一下思路。大概要这样一件事情，目的是将真实的坐标转化成为svg图像上的坐标（逆过程现在先不管，到时候再来重新照猫画虎）。
+分为两个步骤，一个是放缩盒子大小；第二个是把坐标系的摆正（待会细说）。
+而我们拥有的是svg图像的盒子大小为：宽度800，高度400；数一下needham那个图片的格子，我们知道那里面是，x轴为-9到9，y轴是-4到4。
+
+所以很明白的一点是要做这样的事情，例如对于x轴，给定一个-9到9的数字，它应该给出一个[0,800]之间的数字，当然，我们还需要将原点的0点变到400去。
+我们知道这个是放大过程加平移过程,也就是线性变换过程：
+即如下两个过程 [-9,9] => [-400,400] => [0,800]
+1）即把长度为18的东西，变成长度为800的东西，放大了800/18；
+2）把[-400,400] 平移称为 [0,800]
+所以写个这样的函数：
+```js
+function real2svg_X_step1(x) {
+    return x*800/18
+}
+```
+以及
+```js
+function real2svg_X_step2(x) {
+    return x+400
+}
+```
+再稍微思考一下， 这里出现了挺讨人厌的数字，我们把数字抹掉，变成参数传进去。也就是svg_width的宽度和真实坐标的盒子宽度（real_width）。
+```js
+function real2svg_X_step1(x,svg_width,real_width) {
+    return x*svg_width/real_width
+}
+```
+以及平移原点x坐标。
+```js
+function real2svg_X_step2(x,origin_shiftX) {
+    return x+origin_shiftX
+}
+```
+二者组装起来，就是这样子的函数：
+```js
+function real2svg_X(x,svg_width,real_width,origin_shiftX) {
+    return x*svg_width/real_width+origin_shiftX
+}
+```
+如果很早之前就知道是线性变换 x'=k x + b 形式就不需要拆开来这么细节去写。
+但是，既然是写程序，必须要暴露细节出来，自己才能清楚。
+于是，我们可以把y方向的坐标也这样一写。
+```js
+function real2svg_Y(y,svg_height,real_height,origin_shiftY) {
+    return y*svg_height/real_height+origin_shiftY
+}
+```
+在我们的问题里面，svg_height = 400, real_height = 8, 
+以及 origin_shiftY = svg_height/2 （即为svg_height的一半）。
+但是呢，由于这个svg坐标系统和我们常用的坐标系统在y轴的正方向上有差别，
+所以我们必须要把这个方向给转过来。想不清楚也没有关系，就是哪里把正号边成负的。
+例如：y轴上为4的点变到svg坐标y上为0，即 4 ===> 0。
+于是根据上头的式子（real2svg_Y）应该有 4*400/8+200=400,
+但是呢，我们真实的是需要是0，所以，给y上面打个负号就成了即：-4*400/8+200 = 0;
+代码就是这样子的：
+```js
+function real2svg_Y(y,svg_height,real_height,origin_shiftY) {
+    return -y*svg_height/real_height+origin_shiftY
+}
+```
+为了防止出错，我们再代入个其它值试试就可以了。
+所以我们就得到了两个函数，
+```js
+function real2svg_X(x,svg_width,real_width,origin_shiftX) {
+    return x*svg_width/real_width+origin_shiftX
+}
+function real2svg_Y(y,svg_height,real_height,origin_shiftY) {
+    return -y*svg_height/real_height+origin_shiftY
+}
+```
+
+接着我们来试试看，画个坐标为(4,3)这个点的圆圈。
+```js
+let point1x = real2svg_X(4,800,18,400)
+let point1y = real2svg_Y(3,400,8,200)
+
+let point1 = document.createElementNS(svgns, "circle");
+//注意需要改成“circle”
+point1.setAttribute("cx", point1x);
+point1.setAttribute("cy", point1y);
+point1.setAttribute("r", 5); //半径变小了
+point1.setAttribute("stroke", "black");
+point1.setAttribute("stroke-width", "1");
+point1.setAttribute("fill", "black"); //改了填充色
+svg.appendChild(point1);
+```
+![want](https://github.com/leperca/wpmc/blob/master/f1/s7.svg)
+
+由于我们还想画点(-7,1)，（-2，-3），（2，-2）还有（0，3）。
+所以我们最终还是要包装一下上面的函数了。不然写起来太麻烦了。
+包装一下上面的函数为create_point(x,y,svg)。这里的svg就是我们的图像，
+里面的x和y是svg上的坐标。如下：
+```js
+function create_point(x,y,svg){
+    let point1 = document.createElementNS(svgns, "circle");
+    //注意需要改成“circle”
+    point1.setAttribute("cx", x);
+    point1.setAttribute("cy", y);
+    point1.setAttribute("r", 5); //半径变小了
+    point1.setAttribute("stroke", "black");
+    point1.setAttribute("stroke-width", "1");
+    point1.setAttribute("fill", "black"); //改了填充色
+    svg.appendChild(point1);
+}
+```
+其他的一股脑儿都包进去，也就不暴露设置样式的接口了，不重要。
+
+再者为了后文的使用方便，我们给坐标变化那里的函数设置默认值，
+并给了个新的名字，rsx以及rsy且给它们设置了默认值，
+于是我们画出点(-7,1)，（-2，-3），（2，-2）还有（0，3）,（0，4）。
+```js
+function rsx(x,svg_width=800,real_width=18,origin_shiftX=400) {
+    return x*svg_width/real_width+origin_shiftX
+}
+function rsy(y,svg_height=400,real_height=8,origin_shiftY=200) {
+    return -y*svg_height/real_height+origin_shiftY
+}
+create_point(rsx(-7),rsy(1),svg)
+create_point(rsx(-2),rsy(-3),svg)
+create_point(rsx(2),rsy(-2),svg)
+create_point(rsx(0),rsy(3),svg)
+create_point(rsx(4),rsy(0),svg)
+```
+![want](https://github.com/leperca/wpmc/blob/master/f1/s8.svg)
+
