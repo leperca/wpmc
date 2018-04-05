@@ -277,4 +277,63 @@ create_point(rsx(4),rsy(0),svg)
 如果不想自己写网上就有一些代码可以现场拷贝过来。但是呢，我还是自己动手自己写个。哈哈哈。
 我就画了个这样的箭头。
 ![want](https://github.com/leperca/wpmc/blob/master/f1/s9.jpg)
-那么我们就是要画这样的东西。
+那么我们就是要画这样的东西（上面这个图片好大好丑，哈哈哈，没事不管）。
+
+我们可以看看如何用path画上面那个图，百度下，svg path。
+一般都是w3c, 或者像 runoob 这个网站也成。
+或者是mdn上的例子https://developer.mozilla.org/en-US/docs/Web/SVG/Element/marker，
+```html
+<svg width="120" height="120" viewBox="0 0 120 120"
+    xmlns="http://www.w3.org/2000/svg" version="1.1">
+
+  <defs>
+    <marker id="Triangle" viewBox="0 0 10 10" refX="1" refY="5"
+        markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+  </defs>
+
+  <polyline points="10,90 50,80 90,20" fill="none" stroke="black" 
+      stroke-width="2" marker-end="url(#Triangle)" />
+</svg>
+```
+我大概需要变成：
+```html
+<path d="M 0 0 L 10 5 L 0 10 L 5 5 Z" />
+```
+关于M L Z 这些网站上有介绍，具体的样子我们稍微做了改动。
+![want](https://github.com/leperca/wpmc/blob/master/f1/s9.jpg)
+
+于是在我们的svg上的的js代码应该是这样的：
+```js
+// 定义标签
+let my_defs = document.createElementNS(svgns, "defs");
+let my_marker = document.createElementNS(svgns, "marker");
+my_marker.setAttribute("id", "Triangle"); //注意设置id 
+my_marker.setAttribute("viewBox","0 0 10 10");
+my_marker.setAttribute("refX", "6"); 
+my_marker.setAttribute("refY", "5");
+my_marker.setAttribute("markerWidth","6")
+my_marker.setAttribute("markerHeight","6")
+my_marker.setAttribute("orient", "auto");
+// 三角形的arrow
+let arrow = document.createElementNS(svgns, "path");
+arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 L 5 5 Z");
+arrow.setAttribute("fill", "#000000");
+// 标签添加到svg图上
+my_marker.appendChild(arrow);
+my_defs.appendChild(my_marker);
+svg.appendChild(my_defs);
+
+let aline2 = document.createElementNS(svgns, "line");
+aline2.setAttribute("x1", rsx(0));
+aline2.setAttribute("y1", rsy(0));
+aline2.setAttribute("x2", rsx(4));
+aline2.setAttribute("y2", rsy(3));
+aline2.setAttribute("style", "stroke:#000;stroke-width:2");
+aline2.setAttribute("marker-end","url(#Triangle)") // <<<<这里引用上Triangle
+svg.appendChild(aline2);
+```
+上面我们已经要把直线和箭头装上去了。有两种方法，一种就是每次都画一个直线，再把箭头也一起放上去，这会涉及到箭头的旋转的问题。另外一种就是使用svg中的marker。上面的例子就是如此。
+最后结果如图。
+![want](https://github.com/leperca/wpmc/blob/master/f1/s10.svg)
