@@ -273,3 +273,8 @@ create_point(rsx(4),rsy(0),svg)
 ```
 ![want](https://github.com/leperca/wpmc/blob/master/f1/s8.svg)
 
+好了，下面我们就要开始画箭头了。箭头怎么画，我不知道，先查了下别人怎么画的。
+如果不想自己写网上就有一些代码可以现场拷贝过来。但是呢，我还是自己动手自己写个。哈哈哈。
+我就画了个这样的箭头。
+![want](https://github.com/leperca/wpmc/blob/master/f1/s9.jpg)
+那么我们就是要画这样的东西。
