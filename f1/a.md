@@ -1,4 +1,6 @@
-### 今天我要画的是Needham书里的第一章的第一幅图（原版的Figure[1]）。
+今天我要画的是Needham书里的第一章的第一幅图（原版的Figure[1]）。
+
+![want](https://github.com/leperca/wpmc/blob/master/f1/want.png)
 
 所以，我应该随便打开一个文件，就命名为figure1_1.html 开始写代码了。
 所有的文件我都写成html文件吧，也就是这样子的。
@@ -28,6 +30,7 @@ document.body.appendChild(svg)
 ```
 
 以上const 是常量命名，给svgns定义一个常量，以便后面方便使用。然后是createElementNS创建svg标签，设置其宽度为800，高度为400，并且我们设置了一个边界为绿色方便识别。于是我们将得到如下。
+![want](https://github.com/leperca/wpmc/blob/master/f1/s1.png)
 
 接着是我们要做的第一件non-trivial(不平凡)的事情了。画第一条直线。当然了，我是不会的，我就去找了个进了w3c网站关于svg的介绍看看，例子给出的是，我们可以这样子画线。
 
@@ -47,7 +50,7 @@ line.setAttribute("style", "stroke:rgb(99,99,99);stroke-width:1");
 svg.appendChild(line);
 ```
 然后结果就是这样子的。
-
+![want](https://github.com/leperca/wpmc/blob/master/f1/s2.png)
 
 当然，原因是我没有调整上面的参数。这个w3c上的参数到我们这里的参数套路就是上面这样子的，待会见到更多的。其中两点定义一条直线：第一个点(x1,y1)以及第二个点(x2,y2)。
 注意这里的原点是左上方，坐标轴x没变，y轴从上到下为正方向。
@@ -74,4 +77,4 @@ svg.appendChild(line);
 ```
 
 结果为：
-
+![want](https://github.com/leperca/wpmc/blob/master/f1/s3.png)
