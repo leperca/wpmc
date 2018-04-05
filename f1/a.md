@@ -311,7 +311,7 @@ let my_defs = document.createElementNS(svgns, "defs");
 let my_marker = document.createElementNS(svgns, "marker");
 my_marker.setAttribute("id", "Triangle"); //注意设置id 
 my_marker.setAttribute("viewBox","0 0 10 10");
-my_marker.setAttribute("refX", "6"); 
+my_marker.setAttribute("refX", "12"); 
 my_marker.setAttribute("refY", "5");
 my_marker.setAttribute("markerWidth","6")
 my_marker.setAttribute("markerHeight","6")
