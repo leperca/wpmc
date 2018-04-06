@@ -278,9 +278,6 @@ create_point(rsx(4),rsy(0),svg)
 
 好了，下面我们就要开始画箭头了。箭头怎么画，我不知道，先查了下别人怎么画的。
 如果不想自己写网上就有一些代码可以现场拷贝过来。但是呢，我还是自己动手自己写个。哈哈哈。
-我就画了个这样的箭头。
-![want](https://github.com/leperca/wpmc/blob/master/f1/s9.jpg)
-那么我们就是要画这样的东西（上面这个图片好大好丑，哈哈哈，没事不管）。
 
 我们可以看看如何用path画上面那个图，百度下，svg path。
 一般都是w3c, 或者像 runoob 这个网站也成。
@@ -300,12 +297,14 @@ create_point(rsx(4),rsy(0),svg)
       stroke-width="2" marker-end="url(#Triangle)" />
 </svg>
 ```
+我就画了个这样的箭头。
+![want](https://github.com/leperca/wpmc/blob/master/f1/s9.jpg)
+那么我们就是要画这样的东西（上面这个图片好大好丑，哈哈哈，没事不管）。
 我大概需要变成：
 ```html
 <path d="M 0 0 L 10 5 L 0 10 L 5 5 Z" />
 ```
 关于M L Z 这些网站上有介绍，具体的样子我们稍微做了改动。
-![want](https://github.com/leperca/wpmc/blob/master/f1/s9.jpg)
 
 于是在我们的svg上的的js代码应该是这样的：
 ```js
@@ -536,4 +535,5 @@ svg.setAttribute("style","")
 
 最后的结果见链接
 ## https://leperca.github.io/wpmc/f1/figure1_1.html
+### 以及本目录下的figure1_1.html的代码
 END.
