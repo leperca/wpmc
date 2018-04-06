@@ -337,3 +337,198 @@ svg.appendChild(aline2);
 上面我们已经要把直线和箭头装上去了。有两种方法，一种就是每次都画一个直线，再把箭头也一起放上去，这会涉及到箭头的旋转的问题。另外一种就是使用svg中的marker。上面的例子就是如此。
 最后结果如图。
 ![want](https://github.com/leperca/wpmc/blob/master/f1/s10.svg)
+
+好了，包装一下函数，我们就可以画箭头了。
+
+```js
+// 包装marker
+function create_marker(svg, idname) {
+    // 定义标签
+    let my_defs = document.createElementNS(svgns, "defs");
+    let my_marker = document.createElementNS(svgns, "marker");
+    my_marker.setAttribute("id", idname); //注意设置id 
+    my_marker.setAttribute("viewBox", "0 0 10 10");
+    my_marker.setAttribute("refX", "12");
+    my_marker.setAttribute("refY", "5");
+    my_marker.setAttribute("markerWidth", "6")
+    my_marker.setAttribute("markerHeight", "6")
+    my_marker.setAttribute("orient", "auto");
+    // arrow
+    let arrow = document.createElementNS(svgns, "path");
+    arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 L 5 5 Z");
+    arrow.setAttribute("fill", "#000000");
+    // 标签添加到svg图上
+    my_marker.appendChild(arrow);
+    my_defs.appendChild(my_marker);
+    svg.appendChild(my_defs);
+    return idname
+}
+// 包装箭头函数
+function create_arrow(x1, y1, x2, y2, svg,idname) {
+    let aline2 = document.createElementNS(svgns, "line");
+    aline2.setAttribute("x1", x1);
+    aline2.setAttribute("y1", y1);
+    aline2.setAttribute("x2", x2);
+    aline2.setAttribute("y2", y2);
+    aline2.setAttribute("style", "stroke:#000;stroke-width:2");
+    aline2.setAttribute("marker-end", `url(#${idname})`) //注意修改了这里
+    svg.appendChild(aline2);
+}
+
+idname = create_marker(svg,"my_arrow")
+create_arrow(rsx(0),rsy(0),rsx(-7),rsy(1),svg,idname)
+create_arrow(rsx(0),rsy(0),rsx(-2),rsy(-3),svg,idname)
+create_arrow(rsx(0),rsy(0),rsx(0),rsy(3),svg,idname)
+create_arrow(rsx(0),rsy(0),rsx(2),rsy(-2),svg,idname)
+create_arrow(rsx(0),rsy(0),rsx(4),rsy(0),svg,idname)
+```
+所以图像是这样的。
+![want](https://github.com/leperca/wpmc/blob/master/f1/s11.svg)
+当然这里有点小瑕疵，最后再来修改。
+
+回头翻了翻SVG Essential的书籍，有一些事情的确有更好的处理方式。有些探索似乎没有必要，自己的方法也显得很啰嗦。但是回头一想，这应该就是学习的过程，摸索一些自己处理的方式，尔后再去学习就知道哪些东西是自己可以学习到的。而且本文的目的就是记录一些常见的弯路。很多材料都是精致整理过的东西，让人觉得一下子就应该这么做，反而阻碍了人们的前行。就跟研究一样，很多时候就是摸索着前进，摸到什么就写一份报告，迂回的道路才是一条常规的路线。不奢求一次到位。
+
+回来，我们剩下要做的事情就是写上文字了和背景网格的事情。
+
+着手写文字。
+再次同样的方式：
+```js
+let t1 = document.createElementNS(svgns, "text");
+t1.setAttribute("x",  rsx(4))
+t1.setAttribute("y",  rsy(3))
+t1.setAttribute("dx", 10)
+t1.setAttribute("dy", 10)
+t1.innerHTML = "4+3i";
+svg.appendChild(t1);
+```
+结果如图：
+![want](https://github.com/leperca/wpmc/blob/master/f1/s12.svg)
+整合为函数：
+```js
+function create_text(text,x,y,svg,dx=10,dy=10) {
+    let t1 = document.createElementNS(svgns, "text");
+    t1.setAttribute("x", x)
+    t1.setAttribute("y", y)
+    t1.setAttribute("dx", dx)
+    t1.setAttribute("dy", dy)
+    t1.innerHTML = text;
+    svg.appendChild(t1);
+}
+create_text("3i",rsx(0),rsy(3),svg)
+create_text("4",rsx(4),rsy(0),svg,0,20)
+create_text("-2-3i",rsx(-2),rsy(-3),svg)
+create_text("2-2i",rsx(2),rsy(-2),svg)
+create_text("0",rsx(0),rsy(0),svg,-10,-10)
+create_text("-7+i",rsx(-7),rsy(1),svg,-10,-10)
+```
+结果如图：
+![want](https://github.com/leperca/wpmc/blob/master/f1/s13.svg)
+
+最后把虚线画上，经过查询，看到这样一个例子：
+```html
+<line stroke-dasharray="5, 5" x1="10" y1="10" x2="190" y2="10" />
+```
+那么我们就先画一条虚线：
+```js
+let dashed1 = document.createElementNS(svgns, "line");
+dashed1.setAttribute("x1", rsx(-9))
+dashed1.setAttribute("y1", rsy(1))
+dashed1.setAttribute("x2", rsx(9))
+dashed1.setAttribute("y2", rsy(1))
+dashed1.setAttribute("stroke-dasharray","5,5")
+dashed1.setAttribute("stroke", 'black')
+svg.appendChild(dashed1)
+```
+结果如图：
+![want](https://github.com/leperca/wpmc/blob/master/f1/s14.svg)
+
+同样的方式，整合成函数再画剩余的线。
+```js
+function create_dash(x1,y1,x2,y2,svg) {
+    let dashed1 = document.createElementNS(svgns, "line");
+    dashed1.setAttribute("x1", x1)
+    dashed1.setAttribute("y1", y1)
+    dashed1.setAttribute("x2", x2)
+    dashed1.setAttribute("y2", y2)
+    dashed1.setAttribute("stroke-dasharray", "5,5")
+    dashed1.setAttribute("stroke", 'rgb(155,155,155)')
+    svg.appendChild(dashed1)
+}
+//horizontal
+create_dash(rsx(-9), rsy(2), rsx(9), rsy(2),svg)
+create_dash(rsx(-9), rsy(3), rsx(9), rsy(3),svg)
+create_dash(rsx(-9), rsy(-1), rsx(9), rsy(-1),svg)
+create_dash(rsx(-9), rsy(-2), rsx(9), rsy(-2),svg)
+create_dash(rsx(-9), rsy(-3), rsx(9), rsy(-3),svg)
+create_dash(rsx(-9), rsy(-4), rsx(9), rsy(-4),svg)
+//vertical
+create_dash(rsx(-1), rsy(-4), rsx(-1), rsy(4),svg)
+create_dash(rsx(-2), rsy(-4), rsx(-2), rsy(4),svg)
+// a new function help to generate dashed lines
+function create_vertDash(x){
+    create_dash(rsx(x), rsy(-4), rsx(x), rsy(4),svg)
+}
+for(let i=0;i<18;i++){
+    create_vertDash(i-9)
+}
+```
+以上发现了一定的模式之后，整合成函数帮助画线，当然一开始就想到应该用函数也可以，这里就是方便理解，先用傻傻的方式先做，再逐步变聪明。哈哈哈。上面的虚线有叠加，但不要紧，最后的结果如图（我们稍微修改了虚线的颜色，可以对比黑线和暗线的差别）
+![want](https://github.com/leperca/wpmc/blob/master/f1/s15.svg)
+
+再补上圆形的矩阵外边框：
+```js
+let rect = document.createElementNS(svgns, "rect");
+rect.setAttribute("width", 800)
+rect.setAttribute("height", 400)
+rect.setAttribute("rx", 40)
+rect.setAttribute("ry", 40)
+rect.setAttribute("fill", 'none')
+rect.setAttribute("stroke", 'blue')
+svg.appendChild(rect)
+```
+如图：
+![want](https://github.com/leperca/wpmc/blob/master/f1/s15.svg)
+
+最最后，我们好像忘记写复平面这几个字以及双写的C。那么写上这个。
+```js
+let t2 = document.createElementNS(svgns, "text");
+t2.setAttribute("x", rsx(-7))
+t2.setAttribute("y", rsy(-1))
+t2.setAttribute("dx", 10)
+t2.setAttribute("dy", 10)
+t2.setAttribute("font-size", 22)
+t2.setAttribute("font-family","'Times New Roman'")
+t2.setAttribute("fill", "black")
+t2.innerHTML = "The Complex Plane";
+svg.appendChild(t2);
+
+let t3 = document.createElementNS(svgns, "text");
+t3.setAttribute("x", rsx(-5.5))
+t3.setAttribute("y", rsy(-2))
+t3.setAttribute("dx", 10)
+t3.setAttribute("dy", 10)
+t3.setAttribute("font-size", 30)
+t3.setAttribute("font-family","Arial Unicode MS")
+t3.setAttribute("fill", "black")
+t3.innerHTML = " &#x2102 ";
+svg.appendChild(t3);
+
+let t4 = document.createElementNS(svgns, "text");
+t4.setAttribute("x", rsx(6))
+t4.setAttribute("y", rsy(-3))
+t4.setAttribute("dx", 10)
+t4.setAttribute("dy", 10)
+t4.setAttribute("font-size", 25)
+t4.setAttribute("fill", "black")
+t4.innerHTML = "复平面";
+svg.appendChild(t4);
+
+svg.setAttribute("style","")
+```
+其中我们把边框清掉了。另外，发现有些边框的线条多画了，循环那里需要再稍微改一改。
+留点小瑕疵吧，当然我是故意留的，一是因为懒，二是，总有些东西我们会不顺心，但也需要接受。
+我们下次翻过头来再回顾重新修改这些比较脏的代码。
+这里就这样结束，如图
+![want](https://github.com/leperca/wpmc/blob/master/f1/s16.svg)
+
+END.
