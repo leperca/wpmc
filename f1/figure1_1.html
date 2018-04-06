@@ -1,0 +1,265 @@
+<html>
+
+<body>
+    <!-- <svg id="main"></svg> -->
+    <script>
+           // 上帝说要有光。
+           // 这里是开始的地方。
+           // .......
+           // 以上是所有的代码。
+    </script>
+    <script>
+        // 第一步
+        const svgns = "http://www.w3.org/2000/svg";
+        let svg = document.createElementNS(svgns, "svg");
+        svg.setAttribute("xmlns", svgns);
+        svg.setAttribute("width", 800);
+        svg.setAttribute("height", 400);
+        svg.setAttribute("style", "border:1px solid green");
+        document.body.appendChild(svg)
+
+        let line = document.createElementNS(svgns, "line");
+        line.setAttribute("x1", 0);
+        line.setAttribute("y1", 200);
+        line.setAttribute("x2", 800);
+        line.setAttribute("y2", 200);
+        line.setAttribute("style", "stroke:rgb(99,99,99);stroke-width:1");
+        svg.appendChild(line);
+
+        let line2 = document.createElementNS(svgns, "line");
+        line2.setAttribute("x1", 400);
+        line2.setAttribute("y1", 0);
+        line2.setAttribute("x2", 400);
+        line2.setAttribute("y2", 400);
+        line2.setAttribute("style", "stroke:rgb(99,99,99);stroke-width:1");
+        svg.appendChild(line2);
+
+        let origin = document.createElementNS(svgns, "circle");
+        //注意需要改成“circle”
+        origin.setAttribute("cx", 400);
+        origin.setAttribute("cy", 200);
+        origin.setAttribute("r", 5);
+        origin.setAttribute("stroke", "black");
+        origin.setAttribute("stroke-width", "1");
+        origin.setAttribute("fill", "white");
+        svg.appendChild(origin);
+
+        function real2svg_X(x, svg_width, real_width, origin_shiftX) {
+            return x * svg_width / real_width + origin_shiftX
+        }
+        function real2svg_Y(y, svg_height, real_height, origin_shiftY) {
+            return -y * svg_height / real_height + origin_shiftY
+        }
+        let point1x = real2svg_X(4, 800, 18, 400)
+        let point1y = real2svg_Y(3, 400, 8, 200)
+
+        let point1 = document.createElementNS(svgns, "circle");
+        //注意需要改成“circle”
+        point1.setAttribute("cx", point1x);
+        point1.setAttribute("cy", point1y);
+        point1.setAttribute("r", 5);
+        point1.setAttribute("stroke", "black");
+        point1.setAttribute("stroke-width", "1");
+        point1.setAttribute("fill", "black");
+        svg.appendChild(point1);
+
+        function create_point(x, y, svg) {
+            let point1 = document.createElementNS(svgns, "circle");
+            //注意需要改成“circle”
+            point1.setAttribute("cx", x);
+            point1.setAttribute("cy", y);
+            point1.setAttribute("r", 5); //半径变小了
+            point1.setAttribute("stroke", "black");
+            point1.setAttribute("stroke-width", "1");
+            point1.setAttribute("fill", "black"); //改了填充色
+            svg.appendChild(point1);
+        }
+
+        function rsx(x, svg_width = 800, real_width = 18, origin_shiftX = 400) {
+            return x * svg_width / real_width + origin_shiftX
+        }
+        function rsy(y, svg_height = 400, real_height = 8, origin_shiftY = 200) {
+            return -y * svg_height / real_height + origin_shiftY
+        }
+        //画点(-7，1)，（-2，-3），（2，-2）还有（0，3）,（0，4）
+        create_point(rsx(-7), rsy(1), svg)
+        create_point(rsx(-2), rsy(-3), svg)
+        create_point(rsx(2), rsy(-2), svg)
+        create_point(rsx(0), rsy(3), svg)
+        create_point(rsx(4), rsy(0), svg)
+
+        // 定义标签
+        let my_defs = document.createElementNS(svgns, "defs");
+        let my_marker = document.createElementNS(svgns, "marker");
+        my_marker.setAttribute("id", "Triangle"); //注意设置id 
+        my_marker.setAttribute("viewBox", "0 0 10 10");
+        my_marker.setAttribute("refX", "12");
+        my_marker.setAttribute("refY", "5");
+        my_marker.setAttribute("markerWidth", "6")
+        my_marker.setAttribute("markerHeight", "6")
+        my_marker.setAttribute("orient", "auto");
+
+        let arrow = document.createElementNS(svgns, "path");
+        arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 L 5 5 Z");
+        arrow.setAttribute("fill", "#000000");
+        // 标签添加到svg图上
+        my_marker.appendChild(arrow);
+        my_defs.appendChild(my_marker);
+        svg.appendChild(my_defs);
+
+        let aline2 = document.createElementNS(svgns, "line");
+        aline2.setAttribute("x1", rsx(0));
+        aline2.setAttribute("y1", rsy(0));
+        aline2.setAttribute("x2", rsx(4));
+        aline2.setAttribute("y2", rsy(3));
+        aline2.setAttribute("style", "stroke:#000;stroke-width:2");
+        aline2.setAttribute("marker-end", "url(#Triangle)")
+        svg.appendChild(aline2);
+
+        function create_marker(svg, idname) {
+            // 定义标签
+            let my_defs = document.createElementNS(svgns, "defs");
+            let my_marker = document.createElementNS(svgns, "marker");
+            my_marker.setAttribute("id", idname); //注意设置id 
+            my_marker.setAttribute("viewBox", "0 0 10 10");
+            my_marker.setAttribute("refX", "12");
+            my_marker.setAttribute("refY", "5");
+            my_marker.setAttribute("markerWidth", "6")
+            my_marker.setAttribute("markerHeight", "6")
+            my_marker.setAttribute("orient", "auto");
+            // arrow
+            let arrow = document.createElementNS(svgns, "path");
+            arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 L 5 5 Z");
+            arrow.setAttribute("fill", "#000000");
+            // 标签添加到svg图上
+            my_marker.appendChild(arrow);
+            my_defs.appendChild(my_marker);
+            svg.appendChild(my_defs);
+            return idname
+        }
+        function create_arrow(x1, y1, x2, y2, svg, idname) {
+            let aline2 = document.createElementNS(svgns, "line");
+            aline2.setAttribute("x1", x1);
+            aline2.setAttribute("y1", y1);
+            aline2.setAttribute("x2", x2);
+            aline2.setAttribute("y2", y2);
+            aline2.setAttribute("style", "stroke:#000;stroke-width:2");
+            aline2.setAttribute("marker-end", `url(#${idname})`)
+            svg.appendChild(aline2);
+        }
+
+        idname = create_marker(svg, "my_arrow")
+        create_arrow(rsx(0), rsy(0), rsx(-7), rsy(1), svg, idname)
+        create_arrow(rsx(0), rsy(0), rsx(-2), rsy(-3), svg, idname)
+        create_arrow(rsx(0), rsy(0), rsx(0), rsy(3), svg, idname)
+        create_arrow(rsx(0), rsy(0), rsx(2), rsy(-2), svg, idname)
+        create_arrow(rsx(0), rsy(0), rsx(4), rsy(0), svg, idname)
+
+        let t1 = document.createElementNS(svgns, "text");
+        t1.setAttribute("x", rsx(4))
+        t1.setAttribute("y", rsy(3))
+        t1.setAttribute("dx", 10)
+        t1.setAttribute("dy", 10)
+        t1.innerHTML = "4+3i";
+        svg.appendChild(t1);
+
+        function create_text(text, x, y, svg, dx = 10, dy = 10) {
+            let t1 = document.createElementNS(svgns, "text");
+            t1.setAttribute("x", x)
+            t1.setAttribute("y", y)
+            t1.setAttribute("dx", dx)
+            t1.setAttribute("dy", dy)
+            t1.innerHTML = text;
+            svg.appendChild(t1);
+        }
+        create_text("3i", rsx(0), rsy(3), svg)
+        create_text("4", rsx(4), rsy(0), svg, 0, 20)
+        create_text("-2-3i", rsx(-2), rsy(-3), svg)
+        create_text("2-2i", rsx(2), rsy(-2), svg)
+        create_text("0", rsx(0), rsy(0), svg, -10, -10)
+        create_text("-7+i", rsx(-7), rsy(1), svg, -10, -10)
+
+        let dashed1 = document.createElementNS(svgns, "line");
+        dashed1.setAttribute("x1", rsx(-9))
+        dashed1.setAttribute("y1", rsy(1))
+        dashed1.setAttribute("x2", rsx(9))
+        dashed1.setAttribute("y2", rsy(1))
+        dashed1.setAttribute("stroke-dasharray", "5,5")
+        dashed1.setAttribute("stroke", 'black')
+        svg.appendChild(dashed1)
+
+        function create_dash(x1,y1,x2,y2,svg) {
+            let dashed1 = document.createElementNS(svgns, "line");
+            dashed1.setAttribute("x1", x1)
+            dashed1.setAttribute("y1", y1)
+            dashed1.setAttribute("x2", x2)
+            dashed1.setAttribute("y2", y2)
+            dashed1.setAttribute("stroke-dasharray", "5,5")
+            dashed1.setAttribute("stroke", "rgb(155,155,155)")
+            svg.appendChild(dashed1)
+        }
+        //horizontal
+        create_dash(rsx(-9), rsy(2), rsx(9), rsy(2),svg)
+        create_dash(rsx(-9), rsy(3), rsx(9), rsy(3),svg)
+        create_dash(rsx(-9), rsy(-1), rsx(9), rsy(-1),svg)
+        create_dash(rsx(-9), rsy(-2), rsx(9), rsy(-2),svg)
+        create_dash(rsx(-9), rsy(-3), rsx(9), rsy(-3),svg)
+        create_dash(rsx(-9), rsy(-4), rsx(9), rsy(-4),svg)
+        //vertical
+        create_dash(rsx(-1), rsy(-4), rsx(-1), rsy(4),svg)
+        create_dash(rsx(-2), rsy(-4), rsx(-2), rsy(4),svg)
+        // a new function help to generate dashed lines
+        function create_vertDash(x){
+            create_dash(rsx(x), rsy(-4), rsx(x), rsy(4),svg)
+        }
+        for(let i=0;i<18;i++){
+            create_vertDash(i-9)
+        }
+
+        let rect = document.createElementNS(svgns, "rect");
+        rect.setAttribute("width", 800)
+        rect.setAttribute("height", 400)
+        rect.setAttribute("rx", 40)
+        rect.setAttribute("ry", 40)
+        rect.setAttribute("fill", 'none')
+        rect.setAttribute("stroke", 'blue')
+        svg.appendChild(rect)
+
+        let t2 = document.createElementNS(svgns, "text");
+        t2.setAttribute("x", rsx(-7))
+        t2.setAttribute("y", rsy(-1))
+        t2.setAttribute("dx", 10)
+        t2.setAttribute("dy", 10)
+        t2.setAttribute("font-size", 22)
+        t2.setAttribute("font-family","'Times New Roman'")
+        t2.setAttribute("fill", "black")
+        t2.innerHTML = "The Complex Plane";
+        svg.appendChild(t2);
+
+        let t3 = document.createElementNS(svgns, "text");
+        t3.setAttribute("x", rsx(-5.5))
+        t3.setAttribute("y", rsy(-2))
+        t3.setAttribute("dx", 10)
+        t3.setAttribute("dy", 10)
+        t3.setAttribute("font-size", 30)
+        t3.setAttribute("font-family","Arial Unicode MS")
+        t3.setAttribute("fill", "black")
+        t3.innerHTML = " &#x2102 ";
+        svg.appendChild(t3);
+
+        let t4 = document.createElementNS(svgns, "text");
+        t4.setAttribute("x", rsx(6))
+        t4.setAttribute("y", rsy(-3))
+        t4.setAttribute("dx", 10)
+        t4.setAttribute("dy", 10)
+        t4.setAttribute("font-size", 25)
+        t4.setAttribute("fill", "black")
+        t4.innerHTML = "复平面";
+        svg.appendChild(t4);
+
+        svg.setAttribute("style","")
+
+    </script>
+</body>
+
+</html>
