@@ -2,6 +2,9 @@
 
 ![want](https://github.com/leperca/wpmc/blob/master/f1/want.png)
 
+我们的最后的结果见链接
+## https://leperca.github.io/wpmc/f1/figure1_1.html
+
 所以，我应该随便打开一个文件，就命名为figure1_1.html 开始写代码了。
 所有的文件我都写成html文件吧，也就是这样子的。
 ```html
@@ -531,4 +534,6 @@ svg.setAttribute("style","")
 这里就这样结束，如图
 ![want](https://github.com/leperca/wpmc/blob/master/f1/s16.svg)
 
+最后的结果见链接
+## https://leperca.github.io/wpmc/f1/figure1_1.html
 END.
