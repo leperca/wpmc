@@ -1,7 +1,7 @@
 下面开始添加交互式的功能。
 我想这个功能才是所有做这件事情的核心所在。
 以needham的第二幅图为例，
-![want](https://github.com/leperca/wpmc/blob/master/f3/want.png)
+![want](https://github.com/leperca/wpmc/blob/master/f3/want.jpg)
 
 ## 添加交互之前的工作
 
