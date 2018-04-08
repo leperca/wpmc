@@ -1,0 +1,227 @@
+<html>
+
+<body>
+    <script>
+        function create_svg(w = 500, h = 500) {
+            let svg = document.createElementNS(svgns, "svg");
+            svg.setAttribute("xmlns", svgns);
+            svg.setAttribute("width", w);
+            svg.setAttribute("height", h);
+            svg.setAttribute("style", "border:1px solid green");
+            document.body.appendChild(svg)
+            return svg;
+        }
+
+        function create_line(x1, y1, x2, y2, dasharray = 0) {
+            let line = document.createElementNS(svgns, "line");
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("style", "stroke:black;stroke-width:1");
+            line.setAttribute("stroke-dasharray", dasharray);
+            return line
+        }
+
+        function create_point(cx, cy, r = 3, color = "yellow", sw = 2) {
+            let o = document.createElementNS(svgns, "circle");
+            //注意需要改成“circle”
+            o.setAttribute("cx", cx);
+            o.setAttribute("cy", cy);
+            o.setAttribute("r", r);
+            o.setAttribute("stroke", "black");
+            o.setAttribute("fill", color);
+            o.setAttribute("stroke-width", sw);
+            return o
+        }
+
+        function insert_arrowdefs(svg, idname = "default") {
+            // 定义标签
+            let my_defs = document.createElementNS(svgns, "defs");
+            let my_marker = document.createElementNS(svgns, "marker");
+            my_marker.setAttribute("id", idname); //注意设置id 
+            my_marker.setAttribute("viewBox", "0 0 10 10");
+            my_marker.setAttribute("refX", "8");
+            my_marker.setAttribute("refY", "5");
+            my_marker.setAttribute("markerWidth", "6")
+            my_marker.setAttribute("markerHeight", "6")
+            my_marker.setAttribute("orient", "auto");
+            // arrow
+            let arrow = document.createElementNS(svgns, "path");
+            arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 L 5 5 Z");
+            arrow.setAttribute("fill", "#000000");
+            // 标签添加到defs图上
+            my_marker.appendChild(arrow);
+            my_defs.appendChild(my_marker);
+            svg.appendChild(my_defs)
+        }
+
+        // 包装箭头函数
+        function create_arrow(x1, y1, x2, y2, idname = 'default') {
+            let line = create_line(x1, y1, x2, y2)
+            line.setAttribute("style", "stroke:#000;stroke-width:2");
+            line.setAttribute("marker-end", `url(#${idname})`)
+            return line
+        }
+
+        function create_text(text, x, y, dx = 10, dy = 10) {
+            let t = document.createElementNS(svgns, "text");
+            t.setAttribute("x", x)
+            t.setAttribute("y", y)
+            t.setAttribute("dx", dx)
+            t.setAttribute("dy", dy)
+            t.innerHTML = text;
+            return t
+        }
+
+        // 把[m,n]中的点变成[p,q]中的点。
+        function linear([m, n], [p, q]) {
+            return function (x) {
+                let k = (p - q) / (m - n); //查到一个错误 少了个let
+                let b = p - k * m; // 这里也少了个 let
+                return k * x + b
+            }
+        }
+    </script>
+    <script>
+        //x轴为[-0.5,5.5]，y轴为[-0.5,3.5]
+
+        const svgns = "http://www.w3.org/2000/svg"
+        let svg_width = 500, svg_height = 400;
+        let s1 = create_svg(svg_width, svg_height)
+        insert_arrowdefs(s1);
+        let s2 = create_svg(svg_width, svg_height)
+        insert_arrowdefs(s2);
+        let rsx = linear([-0.5, 5.5], [0, svg_width])
+        let rsy = linear([-0.5, 3.5], [svg_height, 0])
+
+        let isx = linear([0, svg_width], [-0.5, 5.5])
+        let isy = linear([svg_height, 0], [-0.5, 3.5])
+
+        // 画原点
+        s1.appendChild(create_point(rsx(0), rsy(0), 3, "black"))
+        s2.appendChild(create_point(rsx(0), rsy(0), 3, "black"))
+
+        // complex number
+        function Complex(x, y, _svg_ = "none") {
+            this.real = x;
+            this.img = y;
+            this.point = create_point(rsx(x), rsy(y));
+            this.arrow = create_arrow(rsx(0), rsy(0), rsx(x), rsy(y));
+            this.svg = _svg_;
+            // 复数的加法
+            this.plus = function (comp) {
+                return new Complex(this.real + comp.real, this.img + comp.img, this.svg)
+            }
+
+            this.mult = function (comp) {
+                return new Complex(this.real * comp.real - this.img * comp.img,
+                    this.real * comp.img + this.img * comp.real, this.svg)
+            }
+
+            this.calc_len = function(){
+                return Math.sqrt(this.real**2+this.img**2) 
+            }
+            this.calc_arg = function(){
+                return Math.atan(this.img/this.real) 
+            }
+            // 画上
+            this.draw = function (svg = this.svg) {
+                svg.appendChild(this.arrow)
+                svg.appendChild(this.point)
+            }
+
+            this.moveTo = function (x, y, svg = this.svg) {
+                this.real = x;
+                this.img = y;
+                this.point.setAttribute("cx", rsx(x))
+                this.point.setAttribute("cy", rsy(y))
+                this.arrow.setAttribute("x2", rsx(x))
+                this.arrow.setAttribute("y2", rsy(y))
+            }
+
+            this.drag = function (fn = () => { }) {
+                let comp = this;
+                comp.point.setAttribute("fill", "white")
+                comp.point.setAttribute("stroke", "green")
+                comp.point.setAttribute("r", "5")
+                comp.point.addEventListener("mousedown", moveStart)
+                function moveStart(event) {
+                    console.log("dragStart")
+                    let tx = parseInt(event.target.getAttribute("cx")),
+                        ty = parseInt(event.target.getAttribute("cy"))
+                    let x0 = parseInt(event.clientX), y0 = parseInt(event.clientY)
+                    document.addEventListener("mousemove", moving)
+                    function moving(e) {
+                        let sx = isx(e.clientX - x0 + tx)
+                        let sy = isy(e.clientY - y0 + ty)
+                        comp.moveTo(sx, sy)
+                        fn();
+                        document.addEventListener("mouseup", () => document.removeEventListener("mousemove", moving))
+                    }
+                }
+            }
+        }
+
+        // download("a.svg",s1.outerHTML)
+        // 帮助下载svg文件
+        function download(filename, text) {
+            var pom = document.createElement('a');
+            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            pom.setAttribute('download', filename);
+            var event = document.createEvent('MouseEvents');
+            event.initEvent('click', true, true);
+            pom.dispatchEvent(event);
+        }
+
+
+
+        a = new Complex(1, 0.5, s1)
+        b = new Complex(1, 2, s1)
+        c = a.plus(b)
+        a.draw(); b.draw(); c.draw();
+
+        a.drag(dragingfn);
+        b.drag(dragingfn);
+
+        function dragingfn() {
+            let newC = a.plus(b);
+            c.moveTo(newC.real, newC.img)
+        }
+
+        // fig2
+        x = new Complex(2, 0.2, s2)
+        y = new Complex(1, 0.6, s2)
+        x.draw(); y.draw();
+        z = x.mult(y)
+        z.draw();
+
+        x.drag(dragingfn2)
+        y.drag(dragingfn2)
+
+        text_xlen= create_text("x-len:  "+x.calc_len(),0,0,10,20)
+        text_ylen= create_text("y-len:  "+y.calc_len(),0,20,10,20)
+        text_zlen= create_text("z-len:  "+z.calc_len(),0,40,10,20)
+        text_zarg= create_text("z-arg:  "+z.calc_arg(),0,60,10,20)
+        s2.append(text_xlen)
+        s2.append(text_ylen)
+        s2.append(text_zlen)
+        s2.append(text_zarg)
+        
+
+        function dragingfn2() {
+            let newZ = x.mult(y);
+            z.moveTo(newZ.real, newZ.img)
+            text_xlen.innerHTML = "x-len:  " + x.calc_len()
+            text_ylen.innerHTML = "y-len:  " + y.calc_len()
+            text_zlen.innerHTML = "z-len:  " + newZ.calc_len()
+            text_zarg.innerHTML = "z-arg:  " + newZ.calc_arg()
+        }
+        
+
+
+
+    </script>
+</body>
+
+</html>
