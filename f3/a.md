@@ -82,6 +82,7 @@
 ```
 两个图分别是：
 ![want](https://github.com/leperca/wpmc/blob/master/f3/s1.svg)
+
 ![want](https://github.com/leperca/wpmc/blob/master/f3/s2.svg)
 
 好了，下面来构造拖动。
@@ -139,4 +140,5 @@ function download(filename, text) {
 // 帮助下载svg文件
 ```
 结果见网页 index.html
+## https://leperca.github.io/wpmc/f3/index.html
 以上我们实现了两个复数加法的可视化。
