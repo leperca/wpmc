@@ -139,6 +139,11 @@ function download(filename, text) {
 // download("a.svg",s1.outerHTML)
 // 帮助下载svg文件
 ```
-结果见网页 index.html
+
+![want](https://github.com/leperca/wpmc/blob/master/f3/result.gif)
+
+## 具体结果见网页 index.html
+
 ## https://leperca.github.io/wpmc/f3/index.html
 以上我们实现了两个复数加法的可视化。
+
