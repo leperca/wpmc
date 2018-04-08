@@ -149,3 +149,4 @@ drawHdash(3);drawHdash(-3);drawHdash(-2);drawHdash(1);
 drawVdash(-7);drawVdash(4);drawVdash(2)
 ```
 结果见图。
+![want](https://github.com/leperca/wpmc/blob/master/f2/result.svg)
