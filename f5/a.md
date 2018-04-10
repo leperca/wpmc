@@ -45,20 +45,47 @@ let log = console.log;
 // 为了调试方便。
 ```
 
-新增加了复数的乘法和计算长度和幅角公式，
-当然，这里的幅角公式应该调整一下，但是这里先不改了。下次再说
+以及画图：
 ```js
-this.mult = function (comp) {
-    return new Complex(this.real * comp.real - this.img * comp.img,
-        this.real * comp.img + this.img * comp.real, this.svg)
-}
+ // draw X line
+let x_line = create_line(rsx(-5),rsy(0),rsx(5),rsy(0))
+x_line.style["stroke"] = "#bbbbbb"
+s1.appendChild(x_line.cloneNode())
+s2.appendChild(x_line.cloneNode())
 
-this.calc_len = function(){
-    return Math.sqrt(this.real**2+this.img**2) 
-}
-this.calc_arg = function(){
-    return Math.atan(this.img/this.real) 
-}
+// draw Y line
+let y_line = create_line(rsx(0),rsy(-5),rsx(0),rsy(5))
+y_line.style["stroke"] = "#bbbbbb"
+s1.appendChild(y_line)
+s2.appendChild(y_line.cloneNode())
+
+
+// figure 1
+// function x**2
+let x1 = linspace(-5, 5, 200)
+let y1 = x1.map(x => x ** 2)
+let z1 = zip(x1.map(rsx), y1.map(rsy))
+let p1 = create_poly(z1)
+s1.appendChild(p1)
+
+// function m*x+2
+let y2 = x1.map(x => 1/2*x + 0.6)
+let z2 = zip(x1.map(rsx), y2.map(rsy))
+let p2 = create_poly(z2)
+s1.appendChild(p2)
+
+// figure 2
+// function x**3
+
+let y3 = x1.map(x => x ** 3)
+let z3 = zip(x1.map(rsx), y3.map(rsy))
+let p3 = create_poly(z3)
+s2.appendChild(p3)
+
+let y4 = x1.map(x => -2 * x + 0.6 )
+let z4 = zip(x1.map(rsx), y4.map(rsy))
+let p4 = create_poly(z4)
+s2.appendChild(p4)
 ```
 结果
 ## 见网页index.html
