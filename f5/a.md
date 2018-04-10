@@ -1,5 +1,5 @@
 现在我们要画第三幅图。
-![want](https://github.com/leperca/wpmc/blob/master/f4/want_1_3.png)
+![want](https://github.com/leperca/wpmc/blob/master/f5/want_1_3.png)
 
 同样复用上次的代码。
 
