@@ -71,5 +71,6 @@ let svg_elements = [xline, yline, svg_para, svg_opoint,svg_circle,svg_text]
 svg_elements.map(x => mysvg.appendChild(x))
 ```
 见图
+![want](https://github.com/leperca/wpmc/blob/master/f7/result.svg)
 ## 最终结果见网页index.html
 ## https://leperca.github.io/wpmc/f7/index.html
