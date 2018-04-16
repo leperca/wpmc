@@ -1,0 +1,303 @@
+<html>
+
+<body>
+    <script>
+        const svgns = "http://www.w3.org/2000/svg"
+
+        function create_svg(w = 500, h = 500) {
+            let svg = document.createElementNS(svgns, "svg");
+            svg.setAttribute("xmlns", svgns);
+            svg.setAttribute("width", w);
+            svg.setAttribute("height", h);
+            svg.setAttribute("style", "border:1px solid green");
+            document.body.appendChild(svg)
+            return svg;
+        }
+
+        function create_line(x1, y1, x2, y2, dasharray = 0) {
+            let line = document.createElementNS(svgns, "line");
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("style", "stroke:black;stroke-width:1");
+            line.setAttribute("stroke-dasharray", dasharray);
+            return line
+        }
+
+        function create_point(cx, cy, r = 3, color = "yellow", sw = 2) {
+            let o = document.createElementNS(svgns, "circle");
+            //注意需要改成“circle”
+            o.setAttribute("cx", cx);
+            o.setAttribute("cy", cy);
+            o.setAttribute("r", r);
+            o.setAttribute("stroke", "black");
+            o.setAttribute("fill", color);
+            o.setAttribute("stroke-width", sw);
+            return o
+        }
+
+        function insert_arrowdefs(svg, idname = "default") {
+            // 定义标签
+            let my_defs = document.createElementNS(svgns, "defs");
+            let my_marker = document.createElementNS(svgns, "marker");
+            my_marker.setAttribute("id", idname); //注意设置id 
+            my_marker.setAttribute("viewBox", "0 0 10 10");
+            my_marker.setAttribute("refX", "8");
+            my_marker.setAttribute("refY", "5");
+            my_marker.setAttribute("markerWidth", "6")
+            my_marker.setAttribute("markerHeight", "6")
+            my_marker.setAttribute("orient", "auto");
+            // arrow
+            let arrow = document.createElementNS(svgns, "path");
+            arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 L 5 5 Z");
+            arrow.setAttribute("fill", "#000000");
+            // 标签添加到defs图上
+            my_marker.appendChild(arrow);
+            my_defs.appendChild(my_marker);
+            svg.appendChild(my_defs)
+        }
+
+        // 包装箭头函数
+        function create_arrow(x1, y1, x2, y2, idname = 'default') {
+            let line = create_line(x1, y1, x2, y2)
+            line.setAttribute("style", "stroke:#000;stroke-width:2");
+            line.setAttribute("marker-end", `url(#${idname})`)
+            return line
+        }
+
+        function create_text(text, x, y, dx = 10, dy = 10) {
+            let t = document.createElementNS(svgns, "text");
+            t.setAttribute("x", x)
+            t.setAttribute("y", y)
+            t.setAttribute("dx", dx)
+            t.setAttribute("dy", dy)
+            t.innerHTML = text;
+            return t
+        }
+
+        function create_poly(xs) {
+            // xs是数组，例如： [[10,20],[22,2],[23,32]]
+            let ts = "";
+            for (let i = 0; i < xs.length; i++) {
+                ts += xs[i].join(',') + ' '
+            }
+            let poly = document.createElementNS(svgns, "polyline")
+            poly.setAttribute("points", ts)
+            poly.setAttribute("style", "fill:none;stroke:black;stroke-width=2")
+            return poly;
+        }
+
+        function create_polygon(xs) {
+            // xs是数组，例如： [[10,20],[22,2],[23,32]]
+            let ts = "";
+            for (let i = 0; i < xs.length; i++) {
+                ts += xs[i].join(',') + ' '
+            }
+            let poly = document.createElementNS(svgns, "polygon")
+            poly.setAttribute("points", ts)
+            poly.setAttribute("style", "fill:none;stroke:black;stroke-width=2")
+            return poly;
+        }
+
+        // 把[m,n]中的点变成[p,q]中的点。
+        function linear([m, n], [p, q]) {
+            return function (x) {
+                let k = (p - q) / (m - n); //查到一个错误 少了个let
+                let b = p - k * m; // 这里也少了个 let
+                return k * x + b
+            }
+        }
+        // 均匀产生start到end之间n个数字
+        function linspace(start, end, n) {
+            let s = [];
+            let len = (end - start) / (n - 1);
+            for (let k = 0; k < n; k++) {
+                s.push(start + k * len)
+            }
+            return s
+        }
+        // 将数组xs和数组ys拆开打包成点列 [ ..., [x,y], ... ]
+        // 例如[[1,2,3],[4,5,6]] => [[1,4],[2,5],[3,6]]
+        function zip(xs, ys) {
+            let s = [];
+            for (let i = 0; i < xs.length; i++) {
+                s.push([xs[i], ys[i]])
+            }
+            return s
+        }
+        let log = console.log;
+
+    </script>
+    <script>
+        // complex number
+        function Complex(x, y, _svg_ = "none") {
+            this.real = x;
+            this.img = y;
+            this.point = create_point(rsx(x), rsy(y));
+            this.arrow = create_arrow(rsx(0), rsy(0), rsx(x), rsy(y));
+            this.svg = _svg_;
+            // 复数的加法
+            this.plus = function (comp) {
+                return new Complex(this.real + comp.real, this.img + comp.img, this.svg)
+            }
+
+            this.mult = function (comp) {
+                return new Complex(this.real * comp.real - this.img * comp.img,
+                    this.real * comp.img + this.img * comp.real, this.svg)
+            }
+
+            this.calc_len = function () {
+                return Math.sqrt(this.real ** 2 + this.img ** 2)
+            }
+            this.calc_arg = function () {
+                return Math.atan(this.img / this.real)
+            }
+            // 画上
+            this.draw = function (svg = this.svg) {
+                svg.appendChild(this.arrow)
+                svg.appendChild(this.point)
+            }
+
+            this.moveTo = function (x, y, svg = this.svg) {
+                this.real = x;
+                this.img = y;
+                this.point.setAttribute("cx", rsx(x))
+                this.point.setAttribute("cy", rsy(y))
+                this.arrow.setAttribute("x2", rsx(x))
+                this.arrow.setAttribute("y2", rsy(y))
+            }
+
+            this.drag = function (fn = () => { }) {
+                let comp = this;
+                comp.point.setAttribute("fill", "white")
+                comp.point.setAttribute("stroke", "green")
+                comp.point.setAttribute("r", "5")
+                comp.point.addEventListener("mousedown", moveStart)
+                function moveStart(event) {
+                    console.log("dragStart")
+                    let tx = parseFloat(event.target.getAttribute("cx")),
+                        ty = parseFloat(event.target.getAttribute("cy"))
+                    let x0 = parseFloat(event.clientX), y0 = parseFloat(event.clientY)
+                    document.addEventListener("mousemove", moving)
+                    function moving(e) {
+                        let sx = isx(e.clientX - x0 + tx)
+                        let sy = isy(e.clientY - y0 + ty)
+                        comp.moveTo(sx, sy)
+                        fn();
+                        document.addEventListener("mouseup", () => document.removeEventListener("mousemove", moving))
+                    }
+                }
+            }
+        }
+
+        // download("a.svg",s1.outerHTML)
+        // 帮助下载svg文件
+        function download(filename, text) {
+            var pom = document.createElement('a');
+            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            pom.setAttribute('download', filename);
+            var event = document.createEvent('MouseEvents');
+            event.initEvent('click', true, true);
+            pom.dispatchEvent(event);
+        }
+
+        function draw_function(xs, fn) {
+            let ys = xs.map(x => fn(x))
+            let zipped = zip(xs.map(rsx), ys.map(rsy))
+            let poly = create_poly(zipped)
+            return poly
+        }
+
+        function create_slider(name, xmin, xmax, callback = () => { console.log("required fn") }, init = xmin, xstep = (xmax - xmin) / 10) {
+            let div = document.createElement("div")
+            let text1 = document.createElement("label")
+            let text2 = document.createElement("label")
+            let shown_num = document.createElement("label")
+            let slider = document.createElement("input");
+            //segment1
+            text1.innerText = " { " + xmin
+            div.appendChild(text1)
+            //slider
+            slider.type = "range";
+            slider.min = xmin;
+            slider.max = xmax;
+            slider.step = xstep;
+            slider.value = init;
+            div.appendChild(slider)
+            slider.oninput = function (e) {
+                let text = document.getElementById(shown_num.id)
+                text.innerHTML = slider.value
+                div.value = parseFloat(slider.value)
+                callback();
+            }
+            //text2
+            text2.innerText = " " + xmax + " } step: " + xstep + "==> " + name + " = "
+            div.appendChild(text2)
+            shown_num.innerText = " " + init + " "
+            shown_num.id = name + "_idvalue"
+            div.appendChild(shown_num)
+            div.value = parseFloat(slider.value)
+            return div;
+        }
+
+    </script>
+    <script>   
+        //x轴为[-5,5]，y轴为[-5,5]
+        let xmin = -4, xmax = 6;
+        let ymin = -4, ymax = 3;
+
+        let svg_width = 500, svg_height = 250;
+        let mysvg = create_svg(svg_width, svg_height)
+        insert_arrowdefs(mysvg);
+
+        // scale function
+        let rsx = linear([xmin, xmax], [0, svg_width])
+        let rsy = linear([ymin, ymax], [svg_height, 0])
+        // inverse scale function
+        let isx = linear([0, svg_width], [-5, 5])
+        let isy = linear([svg_height, 0], [-5, 5])
+
+        // opoint
+        let svg_opoint = create_point(rsx(0), rsy(0), 3, "white")
+        svg_opoint.style["stroke-width"] = "1"
+
+        // xline
+        let xline = create_arrow(rsx(xmin + 0.2), rsy(0), rsx(xmax - 0.4), rsy(0))
+        xline.style["stroke-width"] = "1.5"
+
+        // yline
+        let yline = create_arrow(rsx(0), rsy(ymin + 0.1), rsx(0), rsy(ymax - 0.1))
+        yline.style["stroke-width"] = "1.5"
+
+        // parallelogram point
+        let opoint = [0, 0]
+        let para_AC = [3, 2], para_AB = [2, -0.5]
+        let plus2d = ([x, y], [m, n]) => [x + m, n + y]
+        let para_ABC = plus2d(para_AC, para_AB)
+        let para = [opoint, para_AC, para_ABC, para_AB]
+        // for svg
+        para = para.map(([x, y]) => [rsx(x), rsy(y)])
+        svg_para = create_polygon(para)
+        svg_para.style.fill = "#000000"
+        svg_para.style["fill-opacity"]="0.5"
+
+        // circle
+        let cx = rsx(-1.5), cy=rsy(1.5), radius = 30;
+        let svg_circle = create_point(cx,cy,radius)
+        svg_circle.style.fill="#999999"
+        svg_circle.style.strokeWidth="1"
+
+        // text 
+        let svg_text = create_text("AC",rsx(para_AC[0]),rsy(para_AC[1]),0,-5)
+
+        // append all the elements into the svg
+        let svg_elements = [xline, yline, svg_para, svg_opoint,svg_circle,svg_text]
+        svg_elements.map(x => mysvg.appendChild(x))
+
+
+    </script>
+
+</body>
+
+</html>
