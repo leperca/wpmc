@@ -1,8 +1,3 @@
-现在我们要画第三幅图。
-![want](https://github.com/leperca/wpmc/blob/master/f5/want_1_3.png)
-
-同样复用上次的代码。
-
 这次我们要画大括号.
 有几种方式，
 一种是利用原来的字符“{”， 然后再加平移转动。
@@ -70,7 +65,7 @@ function create_curly3(x1, y1, x2, y2) {
 ```
 最后可以把函数全部塞进create_cruly中，暴露一个接口即可。
 如图：
-(https://github.com/leperca/wpmc/blob/master/f7/result.svg)
+![want](https://github.com/leperca/wpmc/blob/master/f7/result.svg)
 
 结果
 ## 见网页index.html
