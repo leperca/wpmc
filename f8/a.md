@@ -65,11 +65,11 @@ function create_curly3(x1, y1, x2, y2) {
 ```
 最后可以把函数全部塞进create_cruly中，暴露一个接口即可。
 如图：
-![want](https://github.com/leperca/wpmc/blob/master/f7/result.svg)
+![want](https://github.com/leperca/wpmc/blob/master/f8/result.svg)
 
 结果
 ## 见网页index.html
-## https://leperca.github.io/wpmc/f7/index.html
+## https://leperca.github.io/wpmc/f8/index.html
 
 
 
